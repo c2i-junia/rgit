@@ -1,0 +1,7 @@
+./target
+*.dtxt
+*.rzip
+
+!harry-potter-1.txt
+!test.txt
+

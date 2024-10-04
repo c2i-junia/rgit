@@ -1,0 +1,36 @@
+Git is a content-addressable filesystem. Great. What does that mean? It means that at the core of Git
+is a simple key-value data store. What this means is that you can insert any kind of content into a
+Git repository, for which Git will hand you back a unique key you can use later to retrieve that
+content.
+
+---------------------------------------------------------------------
+
+`rgit init` : 
+- crée un dossier .rgit/ avec HEAD et objects/, index
+
+`rgit cat-file <hash>` : 
+entrée: hash 
+- cherche la valeur associé à ce hash dans la base de donnée
+sortie: text file 
+
+
+rgit hash-object <file>
+entrée: text file
+- compress le text file, crée un hash, et stocke ca dans la base de donnée
+sortie: hash
+
+
+`git update-index <permission> <blob_hash> <file_name>`
+- associe un blob à un nom de fichier, et des permissions , et stocke ca dans le fichier `index` (ligne avec les permissions du fichier, commit hash et nom)
+
+
+`rgit write-tree` 
+- prends toutes les lignes du fichier index, et crée un tree à partir de celaa
+
+
+`rgit commit-tree <commit_name> <author> <tree_hash>
+- il store ces 3 données dans la base de donnée
+
+
+`rgit checkout <commit_hash>`
+- il va créer un working directory à partir de ce commit hash
