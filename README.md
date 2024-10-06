@@ -4,6 +4,52 @@ Recreating git from scratch.
 
 <br>
 
+## Usage 
+
+`rgit init` : 
+- crée un dossier .rgit/ avec HEAD et objects/, index
+
+
+`rgit cat-file <hash>` : 
+entrée: hash 
+- cherche la valeur associé à ce hash dans la base de donnée
+sortie: text file 
+
+
+`rgit hash-object <file>`
+entrée: text file
+- compress le text file, crée un hash, et stocke ca dans la base de donnée
+sortie: hash
+
+
+`git index [--add | --modify] <file_name> <blob_hash>`
+`git index --remove <file_name>`
+- modifie le contenu de l'index en ajoutant, supprimant, ou modifiant une ligne
+
+Apercu du contenu de l'index: 
+```
+100644 ea8c4bf7f35f6f77f75d92ad8ce8349f6e81ddba        .gitignore
+100644 99c52ce48709113c209870b75af0c06e733d1acd        Cargo.lock
+100644 b80b1460a135de041c4762675d6b4d4875f90ec3        Cargo.toml
+100644 de4ffa7843ccd6772c50a4a93981597698370891        LICENSE.txt
+100644 bba8386ffffc30432c957b35dbf70c4b47691290        README.md
+```
+
+
+`rgit write-tree` 
+- prends toutes les lignes du fichier index, et crée un tree à partir de celaa
+
+
+`rgit commit-tree <commit_name> <author> <tree_hash>`
+- il store ces 3 données dans la base de donnée
+- Il ne clean pas l'index (car l'index contient toujours touts les fichier suivis)
+
+
+`rgit checkout <commit_hash>`
+- il va créer un working directory à partir de ce commit hash
+
+<br>
+
 ## Example
 
 ```
@@ -19,7 +65,7 @@ $ ../target/debug/rgit hash-object file1.txt
 992c7b7ce84c66ff44a5a71af422e8f32b533faf
 
 # add the file to the index
-$ ../target/debug/rgit update-index file1.txt 992c7b7ce84c66ff44a5a71af422e8f32b533faf
+$ ../target/debug/rgit index --add file1.txt 992c7b7ce84c66ff44a5a71af422e8f32b533faf
 Updated index with file: file1.txt
 
 # write the current index to a tree object
@@ -42,9 +88,9 @@ $ ../target/debug/rgit hash-object file2.txt
 3dabd70d81126c5f08ef63213d3fce5fb1f7d6e6
 
 # update the index with the modified and new files
-$ ../target/debug/rgit update-index file1.txt 269053dd2a6033fe2b2f5a47efbf8342136b3794
+$ ../target/debug/rgit index --modify file1.txt 269053dd2a6033fe2b2f5a47efbf8342136b3794
 Updated index with file: file1.txt
-$ ../target/debug/rgit update-index file2.txt 3dabd70d81126c5f08ef63213d3fce5fb1f7d6e6
+$ ../target/debug/rgit index --modify file2.txt 3dabd70d81126c5f08ef63213d3fce5fb1f7d6e6
 Updated index with file: file2.txt
 
 # write the new index to a tree object
@@ -76,3 +122,4 @@ $ ../target/debug/rgit checkout 9fa611741454bc43740caf8caa5890fb5bd37b88
 Cleared working directory.
 Restoring tree for commit: 9fa611741454bc43740caf8caa5890fb5bd37b88
 Restored file: file1.txt
+```
