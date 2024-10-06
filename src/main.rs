@@ -1,13 +1,16 @@
 mod commands;
 mod utils;
 
+use crate::utils::RepoPath;
 use commands::cat_file::cat_file;
 use commands::checkout::checkout;
 use commands::commit_tree::commit_tree;
+use commands::fetch::*;
 use commands::hash_object::hash_object;
 use commands::init::init;
-use commands::update_index::*;
 use commands::log::*;
+use commands::push::*;
+use commands::update_index::*;
 use commands::update_ref::*;
 use commands::write_tree::write_tree;
 use std::env;
@@ -33,14 +36,14 @@ fn main() {
                 eprintln!("Usage: rgit cat-file <hash>");
                 std::process::exit(1);
             }
-            println!("{}", cat_file(&args[2]));
+            println!("{}", cat_file(&RepoPath::Local, &args[2]));
         }
         "index" => {
             if args.len() < 4 {
                 eprintln!("Usage: rgit index <operation> <file_name> [<blob_hash>]");
                 std::process::exit(1);
             }
-            
+
             let operation = args[2].as_str();
             let file_name = &args[3];
 
@@ -79,7 +82,9 @@ fn main() {
         "commit-tree" => {
             if args.len() < 5 || args.len() > 6 {
                 println!("{}", args.len());
-                eprintln!("Usage: rgit commit-tree <commit_name> <author> <tree_hash> [parent_hash]");
+                eprintln!(
+                    "Usage: rgit commit-tree <commit_name> <author> <tree_hash> [parent_hash]"
+                );
                 std::process::exit(1);
             }
 
@@ -107,7 +112,7 @@ fn main() {
                 eprintln!("Usage: rgit log <commit_hash>");
                 std::process::exit(1);
             }
-            log(&args[2]);  // Appel de la fonction `log` avec le hash de commit.
+            log(&args[2]); // Appel de la fonction `log` avec le hash de commit.
         }
         "update-ref" => {
             if args.len() != 4 {
@@ -118,12 +123,30 @@ fn main() {
             let commit_hash = &args[3];
             update_ref(ref_name, commit_hash);
         }
+        "push" => {
+            if args.len() != 4 {
+                eprintln!("Usage: rgit push <remote_path> <branch>");
+                std::process::exit(1);
+            }
+            let remote_path = &args[2];
+            let branch = &args[3];
+            push(remote_path, branch);
+        }
+        "fetch" => {
+            if args.len() != 4 {
+                eprintln!("Usage: rgit fetch <remote_path> <branch>");
+                std::process::exit(1);
+            }
+            let remote_path = &args[2];
+            let branch = &args[3];
+            fetch(remote_path, branch);
+        }
         _ => eprintln!("Unknown command: {}", args[1]),
     }
 }
 
 // fn main() {
-//     // handle arguments 
+//     // handle arguments
 //     let args: Vec<String> = env::args().collect();
 //     if args.len() < 2 {
 //         eprintln!("usage: rgit <command> [<args>]");

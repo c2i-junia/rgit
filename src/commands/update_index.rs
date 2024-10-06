@@ -35,7 +35,10 @@ pub fn add_index(file_name: &str, blob_hash: &str) {
     let mut index_map = read_index();
     index_map.insert(file_name.to_string(), blob_hash.to_string());
 
-    println!("Added or updated index with file: {} -> {}", file_name, blob_hash);
+    println!(
+        "Added or updated index with file: {} -> {}",
+        file_name, blob_hash
+    );
     write_index(&index_map);
 }
 
@@ -47,7 +50,10 @@ pub fn update_index(file_name: &str, blob_hash: &str) {
         println!("Updated index with file: {} -> {}", file_name, blob_hash);
         write_index(&index_map);
     } else {
-        eprintln!("Error: File {} not found in the index. Use add_index to add new files.", file_name);
+        eprintln!(
+            "Error: File {} not found in the index. Use add_index to add new files.",
+            file_name
+        );
     }
 }
 

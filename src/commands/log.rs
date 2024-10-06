@@ -1,10 +1,11 @@
 use crate::commands::cat_file::cat_file;
+use crate::utils::RepoPath;
 use std::fs;
 use std::path::Path;
 
 pub fn log(target: &str) {
     // check if the target is a branch
-    let branch_ref_path = format!(".rgit/refs/heads/{}", target);
+    let branch_ref_path = format!(".rgit/refs/{}", target);
     let commit_hash = if Path::new(&branch_ref_path).exists() {
         // read the commit hash from the branch reference file
         fs::read_to_string(&branch_ref_path)
@@ -22,7 +23,7 @@ pub fn log(target: &str) {
     // traverse all commits until there is no more parent
     while !current_commit.is_empty() {
         // read the content of the current commit
-        let commit_content = cat_file(&current_commit);
+        let commit_content = cat_file(&RepoPath::Local, &current_commit);
 
         let author = commit_content
             .lines()

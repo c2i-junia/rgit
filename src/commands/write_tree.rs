@@ -1,6 +1,6 @@
+use crate::utils::hash_and_store;
 use std::fs;
 use std::path::Path;
-use crate::utils::hash_and_store;
 
 pub fn write_tree() {
     let index_path = Path::new(".rgit").join("index");

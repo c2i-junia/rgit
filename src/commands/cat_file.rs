@@ -1,8 +1,8 @@
+use crate::utils::{create_object_path, decompress_object, RepoPath};
 use std::fs;
-use crate::utils::{create_object_path, decompress_object};
 
-pub fn cat_file(hash: &str) -> String {
-    let object_path = create_object_path(hash);
+pub fn cat_file(repo_path: &RepoPath, hash: &str) -> String {
+    let object_path = create_object_path(repo_path, hash);
     if !object_path.exists() {
         eprintln!("Object {} not found.", hash);
         std::process::exit(1);

@@ -1,8 +1,8 @@
+use crate::utils::{compress_object, create_object_path, RepoPath};
+use sha1::{Digest, Sha1};
 use std::fs;
 use std::io::Read;
 use std::path::Path;
-use sha1::{Digest, Sha1};
-use crate::utils::{compress_object, create_object_path};
 
 pub fn hash_object(file_path: &str) {
     let path = Path::new(file_path);
@@ -10,7 +10,8 @@ pub fn hash_object(file_path: &str) {
 
     // read the file content
     let mut contents = Vec::new();
-    file.read_to_end(&mut contents).expect("Failed to read file");
+    file.read_to_end(&mut contents)
+        .expect("Failed to read file");
 
     // create the object header (blob) and concatenate with content
     let header = format!("blob {}\0", contents.len());
@@ -23,7 +24,7 @@ pub fn hash_object(file_path: &str) {
     let hash_str = format!("{:x}", hash);
 
     // create the corresponding object in .rgit/objects/
-    let object_path = create_object_path(&hash_str);
+    let object_path = create_object_path(&RepoPath::Local, &hash_str);
     let compressed_data = compress_object(&store_data);
     fs::write(&object_path, compressed_data).expect("Failed to write object to database");
 
