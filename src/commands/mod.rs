@@ -5,3 +5,4 @@ pub mod update_index;
 pub mod write_tree;
 pub mod commit_tree;
 pub mod checkout;
+pub mod log;

@@ -7,6 +7,7 @@ use commands::commit_tree::commit_tree;
 use commands::hash_object::hash_object;
 use commands::init::init;
 use commands::update_index::*;
+use commands::log::*;
 use commands::write_tree::write_tree;
 use std::env;
 
@@ -99,6 +100,13 @@ fn main() {
                 std::process::exit(1);
             }
             checkout(&args[2]);
+        }
+        "log" => {
+            if args.len() != 3 {
+                eprintln!("Usage: rgit log <commit_hash>");
+                std::process::exit(1);
+            }
+            log(&args[2]);  // Appel de la fonction `log` avec le hash de commit.
         }
         _ => eprintln!("Unknown command: {}", args[1]),
     }
