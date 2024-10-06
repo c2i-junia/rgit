@@ -6,3 +6,4 @@ pub mod write_tree;
 pub mod commit_tree;
 pub mod checkout;
 pub mod log;
+pub mod update_ref;

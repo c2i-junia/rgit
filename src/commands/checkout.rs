@@ -2,18 +2,31 @@ use std::fs;
 use std::path::Path;
 use crate::commands::cat_file::cat_file;
 
-pub fn checkout(commit_hash: &str) {
-    // get the tree hash
-    let commit_content = cat_file(commit_hash);
+pub fn checkout(target: &str) {
+    // check if the target is a branch
+    let branch_ref_path = format!(".rgit/refs/{}", target);
+    let commit_hash = if Path::new(&branch_ref_path).exists() {
+        // read the commit hash from the branch reference file
+        fs::read_to_string(&branch_ref_path).expect("Failed to read branch reference").trim().to_string()
+    } else {
+        // assume the target is a commit hash
+        target.to_string()
+    };
+
+    // obtain the tree hash from the commit
+    let commit_content = cat_file(&commit_hash);
     let tree_hash = commit_content
         .lines()
         .find(|line| line.starts_with("tree "))
         .map(|line| line.split_whitespace().nth(1).unwrap())
         .expect("Commit does not contain a tree");
 
+    // clear the current working directory
     clear_working_directory();
 
+    // restore the tree associated with the commit
     restore_tree(tree_hash, Path::new("."));
+    println!("Checked out to {}", target);
 }
 
 fn clear_working_directory() {

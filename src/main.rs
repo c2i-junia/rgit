@@ -8,6 +8,7 @@ use commands::hash_object::hash_object;
 use commands::init::init;
 use commands::update_index::*;
 use commands::log::*;
+use commands::update_ref::*;
 use commands::write_tree::write_tree;
 use std::env;
 
@@ -107,6 +108,15 @@ fn main() {
                 std::process::exit(1);
             }
             log(&args[2]);  // Appel de la fonction `log` avec le hash de commit.
+        }
+        "update-ref" => {
+            if args.len() != 4 {
+                eprintln!("Usage: rgit update-ref <ref_name> <commit_hash>");
+                std::process::exit(1);
+            }
+            let ref_name = &args[2];
+            let commit_hash = &args[3];
+            update_ref(ref_name, commit_hash);
         }
         _ => eprintln!("Unknown command: {}", args[1]),
     }
