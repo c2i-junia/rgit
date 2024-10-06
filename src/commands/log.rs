@@ -1,20 +1,27 @@
 use crate::commands::cat_file::cat_file;
+use crate::commands::get_head_hash::*;
 use crate::utils::RepoPath;
 use std::fs;
 use std::path::Path;
 
 pub fn log(target: &str) {
-    // check if the target is a branch
-    let branch_ref_path = format!(".rgit/refs/{}", target);
-    let commit_hash = if Path::new(&branch_ref_path).exists() {
-        // read the commit hash from the branch reference file
-        fs::read_to_string(&branch_ref_path)
-            .expect("Failed to read branch reference")
-            .trim()
-            .to_string()
+    // determine the commit hash to start from
+    let commit_hash = if target == "HEAD" {
+        // if target is HEAD, use get_head_hash to retrieve the current commit hash
+        get_head_hash()
     } else {
-        // assume the target is a commit hash
-        target.to_string()
+        // check if the target is a branch
+        let branch_ref_path = format!(".rgit/refs/{}", target);
+        if Path::new(&branch_ref_path).exists() {
+            // read the commit hash from the branch reference file
+            fs::read_to_string(&branch_ref_path)
+                .expect("Failed to read branch reference")
+                .trim()
+                .to_string()
+        } else {
+            // assume the target is a commit hash
+            target.to_string()
+        }
     };
 
     // start from the given commit

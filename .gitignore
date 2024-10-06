@@ -1,5 +1,9 @@
 /target
-/test-repo
-/test-repo2
+/test-workspace
+rgit
+
+add.sh
+remove.sh
+commit.sh
 
 source_code.txt

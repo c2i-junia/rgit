@@ -6,120 +6,83 @@ Recreating git from scratch.
 
 ## Usage 
 
-`rgit init` : 
-- crée un dossier .rgit/ avec HEAD et objects/, index
-
-
-`rgit cat-file <hash>` : 
-entrée: hash 
-- cherche la valeur associé à ce hash dans la base de donnée
-sortie: text file 
-
-
-`rgit hash-object <file>`
-entrée: text file
-- compress le text file, crée un hash, et stocke ca dans la base de donnée
-sortie: hash
-
-
-`git index [--add | --modify] <file_name> <blob_hash>`
-`git index --remove <file_name>`
-- modifie le contenu de l'index en ajoutant, supprimant, ou modifiant une ligne
-
-Apercu du contenu de l'index: 
 ```
-100644 ea8c4bf7f35f6f77f75d92ad8ce8349f6e81ddba        .gitignore
-100644 99c52ce48709113c209870b75af0c06e733d1acd        Cargo.lock
-100644 b80b1460a135de041c4762675d6b4d4875f90ec3        Cargo.toml
-100644 de4ffa7843ccd6772c50a4a93981597698370891        LICENSE.txt
-100644 bba8386ffffc30432c957b35dbf70c4b47691290        README.md
+$ ./rgit --help
+Usage: rgit <command> [<args>]
+
+Options:
+  -h, --help                         Show this help message and exit.
+  --version                          Show the rgit version and exit.
+
+Commands:
+  init                               Initialize a new rgit repository.
+  hash-object <file>                 Compute and store the hash of a file.
+  cat-file <hash>                    Display the contents of an object.
+  index --add <file> <blob_hash>      Add a file to the index.
+  index --modify <file> <blob_hash>   Modify an entry in the index.
+  index --remove <file>               Remove a file from the index.
+  write-tree                         Write the current index to a tree object.
+  commit-tree <message> <author> <tree_hash> [parent_hash]  Create a commit object.
+  checkout <commit_hash|branch>       Checkout a specific commit or branch.
+  log <commit_hash|branch>            Show the log starting from the given commit or branch.
+  update-ref <ref_name> <commit_hash> Update a reference to a commit hash.
+  symbolic-ref <ref_name> <target_ref> Set a symbolic reference.
+  push <remote_path> <branch>         Push local changes to a remote repository.
+  fetch <remote_path> <branch>        Fetch changes from a remote repository.
+  get-head-hash                       Display the commit hash pointed to by HEAD.
+  add <file_name>                     Add a file to the staging area.
+  remove <file_name>                  Remove a file from the index.
+  commit <commit_message> <author>    Commit the staged changes.
 ```
-
-
-`rgit write-tree` 
-- prends toutes les lignes du fichier index, et crée un tree à partir de celaa
-
-
-`rgit commit-tree <commit_name> <author> <tree_hash>`
-- il store ces 3 données dans la base de donnée
-- Il ne clean pas l'index (car l'index contient toujours touts les fichier suivis)
-
-
-`rgit checkout <commit_hash>`
-- il va créer un working directory à partir de ce commit hash
 
 <br>
 
 ## Example
 
 ```
-# initialize a new rgit repository
-$ mkdir test-rgit
-$ cd test-rgit
-$ ../target/debug/rgit init
-Initialized empty rgit repository in .rgit
+$ mkdir -p test-workspace
+$ cd test-workspace
+$ mkdir -p repo1
+$ cd repo1
 
-# create and hash a new file
+# initialize the repository
+$ ../../rgit init
+
+# create a first commit
 $ echo "First commit: Hello, World!" > file1.txt
-$ ../target/debug/rgit hash-object file1.txt
-992c7b7ce84c66ff44a5a71af422e8f32b533faf
+$ ../../rgit add file1.txt
+$ ../../rgit commit "First commit" "eztaah"
 
-# add the file to the index
-$ ../target/debug/rgit index --add file1.txt 992c7b7ce84c66ff44a5a71af422e8f32b533faf
-Updated index with file: file1.txt
+# create another commit
+$ echo "Second commit: Bye" > file1.txt
+$ echo "Second commit: Hola" > file2.txt
+$ ../../rgit add file1.txt
+$ ../../rgit add file2.txt
+$ ../../rgit commit "Second commit" "eztaah"
 
-# write the current index to a tree object
-$ ../target/debug/rgit write-tree
-4dc7c1badedb359d41eb5e2c136998d42935c91e
+# navigate to the repo
+$ cd test-workspace/repo1 
 
-# create the first commit (no parent)
-$ ../target/debug/rgit commit-tree "Initial commit" "eztaah" 4dc7c1badedb359d41eb5e2c136998d42935c91e none
-9fa611741454bc43740caf8caa5890fb5bd37b88
-Index has been cleared.
+# check the commit history
+$ ../../rgit log HEAD
+Commit: ef7a8ed89593e0d327fcc91e62200073985a30d4
+Author: eztaah
+Message: Second commit
 
-# modify the file and add a new file
-$ echo "Second commit: Modified content" > file1.txt
-$ echo "This is a new file called file2.txt" > file2.txt
+Commit: 5d1454489a0b1e3b9d02ee345ea54512de1fe3c1
+Author: eztaah
+Message: First commit
 
-# hash the new files
-$ ../target/debug/rgit hash-object file1.txt
-269053dd2a6033fe2b2f5a47efbf8342136b3794
-$ ../target/debug/rgit hash-object file2.txt
-3dabd70d81126c5f08ef63213d3fce5fb1f7d6e6
+# tag the first commit 
+$ ../../rgit update-ref refs/v0.1 5d1454489a0b1e3b9d02ee345ea54512de1fe3c1
 
-# update the index with the modified and new files
-$ ../target/debug/rgit index --modify file1.txt 269053dd2a6033fe2b2f5a47efbf8342136b3794
-Updated index with file: file1.txt
-$ ../target/debug/rgit index --modify file2.txt 3dabd70d81126c5f08ef63213d3fce5fb1f7d6e6
-Updated index with file: file2.txt
+# checkout on v0.1
+$ ../../rgit checkout v0.1
 
-# write the new index to a tree object
-$ ../target/debug/rgit write-tree
-5425b6571ae918f2d5f254a425d49200ce5c839b
-
-# create a second commit with the previous commit as its parent
-$ ../target/debug/rgit commit-tree "Second commit" "eztaah" 5425b6571ae918f2d5f254a425d49200ce5c839b 9fa611741454bc43740caf8caa5890fb5bd37b88
-736fbe931620e21cae8969a5e63dfdec8c49ab1a
-Index has been cleared.
-
-# checkout the initial commit
-$ ../target/debug/rgit checkout 9fa611741454bc43740caf8caa5890fb5bd37b88
-Cleared working directory.
-Restoring tree for commit: 9fa611741454bc43740caf8caa5890fb5bd37b88
-Restored file: file1.txt
-
-# checkout the second commit
-$ ../target/debug/rgit checkout 736fbe931620e21cae8969a5e63dfdec8c49ab1a
-Cleared working directory.
-Restoring tree for commit: 9fa611741454bc43740caf8caa5890fb5bd37b88
-Restored file: file1.txt
-Restoring tree for commit: 736fbe931620e21cae8969a5e63dfdec8c49ab1a
-Restored file: file1.txt
-Restored file: file2.txt
-
-# checkout back to the initial commit
-$ ../target/debug/rgit checkout 9fa611741454bc43740caf8caa5890fb5bd37b88
-Cleared working directory.
-Restoring tree for commit: 9fa611741454bc43740caf8caa5890fb5bd37b88
-Restored file: file1.txt
+# check the commit history 
+$ ../../rgit log HEAD
+Commit: 5d1454489a0b1e3b9d02ee345ea54512de1fe3c1
+Author: eztaah
+Message: First commit
 ```
+

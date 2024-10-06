@@ -6,23 +6,61 @@ use commands::cat_file::cat_file;
 use commands::checkout::checkout;
 use commands::commit_tree::commit_tree;
 use commands::fetch::*;
+use commands::get_head_hash::*;
 use commands::hash_object::hash_object;
 use commands::init::init;
 use commands::log::*;
 use commands::push::*;
+use commands::symbolic_ref::*;
 use commands::update_index::*;
 use commands::update_ref::*;
 use commands::write_tree::write_tree;
 use std::env;
+use std::process::Command;
+
+fn print_usage() {
+    println!("Usage: rgit <command> [<args>]");
+    println!();
+    println!("Options:");
+    println!("  -h, --help                         Show this help message and exit.");
+    println!("  --version                          Show the rgit version and exit.");
+    println!();
+    println!("Commands:");
+    println!("  init                               Initialize a new rgit repository.");
+    println!("  hash-object <file>                 Compute and store the hash of a file.");
+    println!("  cat-file <hash>                    Display the contents of an object.");
+    println!("  index --add <file> <blob_hash>      Add a file to the index.");
+    println!("  index --modify <file> <blob_hash>   Modify an entry in the index.");
+    println!("  index --remove <file>               Remove a file from the index.");
+    println!("  write-tree                         Write the current index to a tree object.");
+    println!("  commit-tree <message> <author> <tree_hash> [parent_hash]  Create a commit object.");
+    println!("  checkout <commit_hash|branch>       Checkout a specific commit or branch.");
+    println!("  log <commit_hash|branch>            Show the log starting from the given commit or branch.");
+    println!("  update-ref <ref_name> <commit_hash> Update a reference to a commit hash.");
+    println!("  symbolic-ref <ref_name> <target_ref> Set a symbolic reference.");
+    println!("  push <remote_path> <branch>         Push local changes to a remote repository.");
+    println!("  fetch <remote_path> <branch>        Fetch changes from a remote repository.");
+    println!("  get-head-hash                       Display the commit hash pointed to by HEAD.");
+    println!("  add <file_name>                     Add a file to the staging area.");
+    println!("  remove <file_name>                  Remove a file from the index.");
+    println!("  commit <commit_message> <author>    Commit the staged changes.");
+    println!();
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: rgit <command> [<args>]");
-        std::process::exit(1);
+        print_usage();
+        std::process::exit(0);
     }
 
     match args[1].as_str() {
+        "--help" | "-h" => {
+            print_usage();
+        }
+        "--version" => {
+            println!("rgit v0.0");
+        }
         "init" => init(),
         "hash-object" => {
             if args.len() != 3 {
@@ -123,6 +161,15 @@ fn main() {
             let commit_hash = &args[3];
             update_ref(ref_name, commit_hash);
         }
+        "symbolic-ref" => {
+            if args.len() != 4 {
+                eprintln!("Usage: rgit symbolic-ref <ref_name> <target_ref>");
+                std::process::exit(1);
+            }
+            let ref_name = &args[2];
+            let target_ref = &args[3];
+            symbolic_ref(ref_name, target_ref);
+        }
         "push" => {
             if args.len() != 4 {
                 eprintln!("Usage: rgit push <remote_path> <branch>");
@@ -140,6 +187,76 @@ fn main() {
             let remote_path = &args[2];
             let branch = &args[3];
             fetch(remote_path, branch);
+        }
+        "get-head-hash" => {
+            if args.len() != 2 {
+                eprintln!("Usage: rgit get-head-hash");
+                std::process::exit(1);
+            }
+            println!("{}", get_head_hash());
+        }
+        "add" => {
+            if args.len() < 3 {
+                eprintln!("Usage: rgit add <file_name>");
+                std::process::exit(1);
+            }
+
+            // get exe location
+            let exe_path = env::current_exe().expect("Failed to get path of executable");
+            let mut script_path = exe_path.parent().unwrap().to_path_buf();
+            script_path.push("src/commands/add.sh");
+
+            let status = Command::new(script_path)
+                .args(&args[2..])
+                .status()
+                .expect("Failed to execute add.sh");
+
+            if !status.success() {
+                eprintln!("Error: add.sh failed");
+                std::process::exit(1);
+            }
+        }
+        "remove" => {
+            if args.len() < 3 {
+                eprintln!("Usage: rgit remove <file_name>");
+                std::process::exit(1);
+            }
+
+            // get exe location
+            let exe_path = env::current_exe().expect("Failed to get path of executable");
+            let mut script_path = exe_path.parent().unwrap().to_path_buf();
+            script_path.push("src/commands/remove.sh");
+
+            let status = Command::new(script_path)
+                .args(&args[2..])
+                .status()
+                .expect("Failed to execute remove.sh");
+
+            if !status.success() {
+                eprintln!("Error: remove.sh failed");
+                std::process::exit(1);
+            }
+        }
+        "commit" => {
+            if args.len() < 3 {
+                eprintln!("Usage: rgit commit <commit_title> <author>");
+                std::process::exit(1);
+            }
+
+            // get exe location
+            let exe_path = env::current_exe().expect("Failed to get path of executable");
+            let mut script_path = exe_path.parent().unwrap().to_path_buf();
+            script_path.push("src/commands/commit.sh");
+
+            let status = Command::new(script_path)
+                .args(&args[2..])
+                .status()
+                .expect("Failed to execute commit.sh");
+
+            if !status.success() {
+                eprintln!("Error: commit.sh failed");
+                std::process::exit(1);
+            }
         }
         _ => eprintln!("Unknown command: {}", args[1]),
     }

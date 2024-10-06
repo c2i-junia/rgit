@@ -1,4 +1,6 @@
 use crate::commands::cat_file::cat_file;
+use crate::commands::symbolic_ref::*;
+use crate::commands::update_ref::*;
 use crate::utils::RepoPath;
 use std::fs;
 use std::path::Path;
@@ -31,6 +33,17 @@ pub fn checkout(target: &str) {
     // restore the tree associated with the commit
     restore_tree(tree_hash, Path::new("."));
     println!("Checked out to {}", target);
+
+    // update HEAD
+    if Path::new(&branch_ref_path).exists() {
+        // If the target is a branch, make HEAD point to this branch
+        symbolic_ref("HEAD", &format!("refs/{}", target));
+        println!("Checked out to branch '{}'", target);
+    } else {
+        // If the target is a commit hash, set HEAD directly to this commit
+        update_ref("HEAD", &commit_hash);
+        println!("Checked out to commit '{}'", commit_hash);
+    }
 }
 
 fn clear_working_directory() {

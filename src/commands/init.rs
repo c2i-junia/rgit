@@ -16,7 +16,9 @@ pub fn init() {
     fs::create_dir(&refs_path).expect("Failed to create .rgit/refs directory");
 
     let index_path = rgit_path.join("index");
+    let head_path = rgit_path.join("HEAD");
     fs::write(index_path, "").expect("Failed to write index file");
+    fs::write(head_path, "").expect("Failed to write HEAD file");
 
     println!(
         "Initialized empty rgit repository in {}",
