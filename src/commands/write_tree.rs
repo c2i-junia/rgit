@@ -1,12 +1,12 @@
 use crate::utils::hash_and_store;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn write_tree() -> String {
-    let index_path = Path::new(".rgit").join("index");
-    let index_content = fs::read_to_string(&index_path).expect("Failed to read index");
+    let index_path: PathBuf = Path::new(".rgit").join("index");
+    let index_content: String = fs::read_to_string(&index_path).expect("Failed to read index");
 
-    let mut tree_entries = Vec::new();
+    let mut tree_entries: Vec<String> = Vec::new();
 
     for line in index_content.lines() {
         let parts: Vec<&str> = line.split_whitespace().collect();
@@ -14,13 +14,13 @@ pub fn write_tree() -> String {
             eprintln!("Invalid index entry: {}", line);
             continue;
         }
-        let (file_name, blob_hash) = (parts[0], parts[1]);
-        let entry = format!("100644 blob {} {}\n", blob_hash, file_name);
+        let (file_name, blob_hash): (&str, &str) = (parts[0], parts[1]);
+        let entry: String = format!("100644 blob {} {}\n", blob_hash, file_name);
         tree_entries.push(entry);
     }
 
-    let tree_data = tree_entries.join("");
-    let tree_hash = hash_and_store("tree", &tree_data.into_bytes());
+    let tree_data: String = tree_entries.join("");
+    let tree_hash: String = hash_and_store("tree", &tree_data.into_bytes());
 
     tree_hash
 }

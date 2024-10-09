@@ -6,12 +6,12 @@ use std::path::Path;
 
 pub fn log(target: &str) {
     // determine the commit hash to start from
-    let commit_hash = if target == "HEAD" {
+    let commit_hash: String = if target == "HEAD" {
         // if target is HEAD, use get_head_hash to retrieve the current commit hash
         get_head_hash()
     } else {
         // check if the target is a branch
-        let branch_ref_path = format!(".rgit/refs/{}", target);
+        let branch_ref_path: String = format!(".rgit/refs/{}", target);
         if Path::new(&branch_ref_path).exists() {
             // read the commit hash from the branch reference file
             fs::read_to_string(&branch_ref_path)
@@ -25,20 +25,20 @@ pub fn log(target: &str) {
     };
 
     // start from the given commit
-    let mut current_commit = commit_hash;
+    let mut current_commit: String = commit_hash;
 
     // traverse all commits until there is no more parent
     while !current_commit.is_empty() {
         // read the content of the current commit
-        let commit_content = cat_file(&RepoPath::Local, &current_commit);
+        let commit_content: String = cat_file(&RepoPath::Local, &current_commit);
 
-        let author = commit_content
+        let author: &str = commit_content
             .lines()
             .find(|line| line.starts_with("author "))
             .map(|line| line.trim_start_matches("author "))
             .unwrap_or("unknown author");
 
-        let message = commit_content
+        let message: String = commit_content
             .lines()
             .skip_while(|line| !line.is_empty())
             .skip(1)

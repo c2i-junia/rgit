@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn read_index() -> HashMap<String, String> {
-    let index_path = Path::new(".rgit").join("index");
-    let mut index_map = HashMap::new();
+    let index_path: PathBuf = Path::new(".rgit").join("index");
+    let mut index_map: HashMap<String, String> = HashMap::new();
 
     if let Ok(index_content) = fs::read_to_string(&index_path) {
         for line in index_content.lines() {
             let parts: Vec<&str> = line.split_whitespace().collect();
             if parts.len() == 2 {
-                let file_name = parts[0].to_string();
-                let blob_hash = parts[1].to_string();
+                let file_name: String = parts[0].to_string();
+                let blob_hash: String = parts[1].to_string();
                 index_map.insert(file_name, blob_hash);
             }
         }
@@ -21,7 +21,7 @@ fn read_index() -> HashMap<String, String> {
 }
 
 fn write_index(index_map: &HashMap<String, String>) {
-    let index_path = Path::new(".rgit").join("index");
+    let index_path: PathBuf = Path::new(".rgit").join("index");
 
     let new_index_content: String = index_map
         .iter()
@@ -32,7 +32,7 @@ fn write_index(index_map: &HashMap<String, String>) {
 }
 
 pub fn add_index(file_name: &str, blob_hash: &str) {
-    let mut index_map = read_index();
+    let mut index_map: HashMap<String, String> = read_index();
     index_map.insert(file_name.to_string(), blob_hash.to_string());
 
     println!(
@@ -43,7 +43,7 @@ pub fn add_index(file_name: &str, blob_hash: &str) {
 }
 
 pub fn update_index(file_name: &str, blob_hash: &str) {
-    let mut index_map = read_index();
+    let mut index_map: HashMap<String, String> = read_index();
 
     if index_map.contains_key(file_name) {
         index_map.insert(file_name.to_string(), blob_hash.to_string());
@@ -58,7 +58,7 @@ pub fn update_index(file_name: &str, blob_hash: &str) {
 }
 
 pub fn remove_index(file_name: &str) {
-    let mut index_map = read_index();
+    let mut index_map: HashMap<String, String> = read_index();
 
     if index_map.remove(file_name).is_some() {
         println!("Removed {} from index.", file_name);

@@ -1,9 +1,9 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn update_ref(ref_name: &str, commit_hash: &str) {
     // construct the full path to the reference (e.g., ".rgit/refs/master")
-    let ref_path = Path::new(".rgit").join(ref_name);
+    let ref_path: PathBuf = Path::new(".rgit").join(ref_name);
 
     // create necessary directories if they don't exist
     if let Some(parent_dir) = ref_path.parent() {

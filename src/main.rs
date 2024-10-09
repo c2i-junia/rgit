@@ -17,7 +17,8 @@ use commands::update_index::*;
 use commands::update_ref::*;
 use commands::write_tree::write_tree;
 use std::env;
-use std::process::Command;
+use std::path::PathBuf;
+use std::process::{Command, ExitStatus};
 
 fn print_usage() {
     println!("Usage: rgit <command> [<args>]");
@@ -83,8 +84,8 @@ fn main() {
                 std::process::exit(1);
             }
 
-            let operation = args[2].as_str();
-            let file_name = &args[3];
+            let operation: &str = args[2].as_str();
+            let file_name: &str = &args[3];
 
             match operation {
                 "--add" => {
@@ -92,7 +93,7 @@ fn main() {
                         eprintln!("Usage: rgit index --add <file_name> <blob_hash>");
                         std::process::exit(1);
                     }
-                    let blob_hash = &args[4];
+                    let blob_hash: &str = &args[4];
                     add_index(file_name, blob_hash);
                 }
                 "--modify" => {
@@ -100,7 +101,7 @@ fn main() {
                         eprintln!("Usage: rgit index --modify <file_name> <blob_hash>");
                         std::process::exit(1);
                     }
-                    let blob_hash = &args[4];
+                    let blob_hash: &str = &args[4];
                     update_index(file_name, blob_hash);
                 }
                 "--remove" => {
@@ -118,7 +119,7 @@ fn main() {
             }
         }
         "write-tree" => {
-            let tree_hash = write_tree();
+            let tree_hash: String = write_tree();
             println!("{}", tree_hash);
         }
         "commit-tree" => {
@@ -130,21 +131,21 @@ fn main() {
                 std::process::exit(1);
             }
 
-            let commit_name = &args[2];
-            let author = &args[3];
-            let tree_hash = &args[4];
+            let commit_name: &str = &args[2];
+            let author: &str = &args[3];
+            let tree_hash: &str = &args[4];
 
-            let parent = if args.len() == 6 && args[5].to_lowercase() != "none" {
+            let parent: Option<&str> = if args.len() == 6 && args[5].to_lowercase() != "none" {
                 Some(&args[5])
             } else {
                 None
             };
 
-            let commit_hash = commit_tree(
+            let commit_hash: String = commit_tree(
                 commit_name,
                 author,
                 tree_hash.to_string(),
-                parent.map(|x| x.as_str()),
+                parent.map(|x| x),
             );
             println!("{}", commit_hash);
         }
@@ -160,15 +161,15 @@ fn main() {
                 eprintln!("Usage: rgit log <commit_hash>");
                 std::process::exit(1);
             }
-            log(&args[2]); // Appel de la fonction `log` avec le hash de commit.
+            log(&args[2]);
         }
         "update-ref" => {
             if args.len() != 4 {
                 eprintln!("Usage: rgit update-ref <ref_name> <commit_hash>");
                 std::process::exit(1);
             }
-            let ref_name = &args[2];
-            let commit_hash = &args[3];
+            let ref_name: &str = &args[2];
+            let commit_hash: &str = &args[3];
             update_ref(ref_name, commit_hash);
         }
         "symbolic-ref" => {
@@ -176,8 +177,8 @@ fn main() {
                 eprintln!("Usage: rgit symbolic-ref <ref_name> <target_ref>");
                 std::process::exit(1);
             }
-            let ref_name = &args[2];
-            let target_ref = &args[3];
+            let ref_name: &str = &args[2];
+            let target_ref: &str = &args[3];
             symbolic_ref(ref_name, target_ref);
         }
         "push" => {
@@ -185,8 +186,8 @@ fn main() {
                 eprintln!("Usage: rgit push <remote_path> <branch>");
                 std::process::exit(1);
             }
-            let remote_path = &args[2];
-            let branch = &args[3];
+            let remote_path: &str = &args[2];
+            let branch: &str = &args[3];
             push(remote_path, branch);
         }
         "fetch" => {
@@ -194,8 +195,8 @@ fn main() {
                 eprintln!("Usage: rgit fetch <remote_path> <branch>");
                 std::process::exit(1);
             }
-            let remote_path = &args[2];
-            let branch = &args[3];
+            let remote_path: &str = &args[2];
+            let branch: &str = &args[3];
             fetch(remote_path, branch);
         }
         "get-head-hash" => {
@@ -211,12 +212,11 @@ fn main() {
                 std::process::exit(1);
             }
 
-            // get exe location
-            let exe_path = env::current_exe().expect("Failed to get path of executable");
-            let mut script_path = exe_path.parent().unwrap().to_path_buf();
+            let exe_path: PathBuf = env::current_exe().expect("Failed to get path of executable");
+            let mut script_path: PathBuf = exe_path.parent().unwrap().to_path_buf();
             script_path.push("src/commands/add.sh");
 
-            let status = Command::new(script_path)
+            let status: ExitStatus = Command::new(script_path)
                 .args(&args[2..])
                 .status()
                 .expect("Failed to execute add.sh");
@@ -232,12 +232,11 @@ fn main() {
                 std::process::exit(1);
             }
 
-            // get exe location
-            let exe_path = env::current_exe().expect("Failed to get path of executable");
-            let mut script_path = exe_path.parent().unwrap().to_path_buf();
+            let exe_path: PathBuf = env::current_exe().expect("Failed to get path of executable");
+            let mut script_path: PathBuf = exe_path.parent().unwrap().to_path_buf();
             script_path.push("src/commands/remove.sh");
 
-            let status = Command::new(script_path)
+            let status: ExitStatus = Command::new(script_path)
                 .args(&args[2..])
                 .status()
                 .expect("Failed to execute remove.sh");
@@ -254,8 +253,8 @@ fn main() {
                 std::process::exit(1);
             }
 
-            let commit_message = &args[2];
-            let author = &args[3];
+            let commit_message: &str = &args[2];
+            let author: &str = &args[3];
 
             commit(commit_message, author);
         }

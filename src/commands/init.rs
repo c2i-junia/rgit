@@ -1,10 +1,10 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub fn init() {
-    let rgit_path = Path::new(".rgit");
-    let objects_path = rgit_path.join("objects");
-    let refs_path = rgit_path.join("refs");
+    let rgit_path: &Path = Path::new(".rgit");
+    let objects_path: PathBuf = rgit_path.join("objects");
+    let refs_path: PathBuf = rgit_path.join("refs");
 
     if rgit_path.exists() {
         eprintln!("Error: .rgit already exists.");
@@ -15,8 +15,8 @@ pub fn init() {
     fs::create_dir(&objects_path).expect("Failed to create .rgit/objects directory");
     fs::create_dir(&refs_path).expect("Failed to create .rgit/refs directory");
 
-    let index_path = rgit_path.join("index");
-    let head_path = rgit_path.join("HEAD");
+    let index_path: PathBuf = rgit_path.join("index");
+    let head_path: PathBuf = rgit_path.join("HEAD");
     fs::write(index_path, "").expect("Failed to write index file");
     fs::write(head_path, "").expect("Failed to write HEAD file");
 
