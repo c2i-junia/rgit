@@ -2,7 +2,7 @@ use crate::utils::hash_and_store;
 use std::fs;
 use std::path::Path;
 
-pub fn write_tree() {
+pub fn write_tree() -> String {
     let index_path = Path::new(".rgit").join("index");
     let index_content = fs::read_to_string(&index_path).expect("Failed to read index");
 
@@ -22,5 +22,5 @@ pub fn write_tree() {
     let tree_data = tree_entries.join("");
     let tree_hash = hash_and_store("tree", &tree_data.into_bytes());
 
-    println!("{}", tree_hash);
+    tree_hash
 }

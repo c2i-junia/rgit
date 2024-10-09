@@ -4,6 +4,7 @@ mod utils;
 use crate::utils::RepoPath;
 use commands::cat_file::cat_file;
 use commands::checkout::checkout;
+use commands::commit::*;
 use commands::commit_tree::commit_tree;
 use commands::fetch::*;
 use commands::get_head_hash::*;
@@ -116,12 +117,15 @@ fn main() {
                 }
             }
         }
-        "write-tree" => write_tree(),
+        "write-tree" => {
+            let tree_hash = write_tree();
+            println!("{}", tree_hash);
+        }
         "commit-tree" => {
             if args.len() < 5 || args.len() > 6 {
                 println!("{}", args.len());
                 eprintln!(
-                    "Usage: rgit commit-tree <commit_name> <author> <tree_hash> [parent_hash]"
+                    "Usage: rgit commit-tree <commit_message> <author> <tree_hash> [parent_hash]"
                 );
                 std::process::exit(1);
             }
@@ -136,7 +140,13 @@ fn main() {
                 None
             };
 
-            commit_tree(commit_name, author, tree_hash, parent.map(|x| x.as_str()));
+            let commit_hash = commit_tree(
+                commit_name,
+                author,
+                tree_hash.to_string(),
+                parent.map(|x| x.as_str()),
+            );
+            println!("{}", commit_hash);
         }
         "checkout" => {
             if args.len() != 3 {
@@ -238,25 +248,16 @@ fn main() {
             }
         }
         "commit" => {
-            if args.len() < 3 {
-                eprintln!("Usage: rgit commit <commit_title> <author>");
+            if args.len() != 4 {
+                println!("{}", args.len());
+                eprintln!("Usage: rgit commit <commit_message> <author>");
                 std::process::exit(1);
             }
 
-            // get exe location
-            let exe_path = env::current_exe().expect("Failed to get path of executable");
-            let mut script_path = exe_path.parent().unwrap().to_path_buf();
-            script_path.push("src/commands/commit.sh");
+            let commit_message = &args[2];
+            let author = &args[3];
 
-            let status = Command::new(script_path)
-                .args(&args[2..])
-                .status()
-                .expect("Failed to execute commit.sh");
-
-            if !status.success() {
-                eprintln!("Error: commit.sh failed");
-                std::process::exit(1);
-            }
+            commit(commit_message, author);
         }
         _ => eprintln!("Unknown command: {}", args[1]),
     }
