@@ -25,3 +25,37 @@ pub fn init() {
         rgit_path.display()
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::tests::*;
+    use std::path::Path;
+
+    #[test]
+    fn test_init_creates_rgit_directory() {
+        setup_test_repo();
+
+        assert!(
+            Path::new(".rgit").exists(),
+            ".rgit directory should be created."
+        );
+        assert!(
+            Path::new(".rgit/objects").exists(),
+            "objects directory should be created."
+        );
+        assert!(
+            Path::new(".rgit/refs").exists(),
+            "refs directory should be created."
+        );
+        assert!(
+            Path::new(".rgit/index").exists(),
+            "index file should be created."
+        );
+        assert!(
+            Path::new(".rgit/HEAD").exists(),
+            "HEAD file should be created."
+        );
+
+        remove_test_repo();
+    }
+}

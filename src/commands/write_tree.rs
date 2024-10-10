@@ -24,3 +24,40 @@ pub fn write_tree() -> String {
 
     tree_hash
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::utils::tests::{remove_test_repo, setup_test_repo};
+    use std::fs;
+    use std::path::Path;
+
+    #[test]
+    fn test_write_tree_creates_tree_object() {
+        setup_test_repo();
+
+        // add files to the index
+        let file1: &str = "file1.txt";
+        let file2: &str = "file2.txt";
+        fs::write(file1, "content of file 1").unwrap();
+        fs::write(file2, "content of file 2").unwrap();
+
+        // generate blob hashes for the files and add them to the index
+        let hash1: String = crate::commands::hash_object::hash_object(file1);
+        let hash2: String = crate::commands::hash_object::hash_object(file2);
+        crate::commands::update_index::add_index(file1, &hash1);
+        crate::commands::update_index::add_index(file2, &hash2);
+
+        // create the tree object from the index
+        let tree_hash: String = write_tree();
+
+        // verify that the tree object file was created
+        let tree_path: String = format!(".rgit/objects/{}/{}", &tree_hash[0..2], &tree_hash[2..]);
+        assert!(
+            Path::new(&tree_path).exists(),
+            "tree object should be created."
+        );
+
+        remove_test_repo();
+    }
+}

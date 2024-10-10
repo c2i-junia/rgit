@@ -16,3 +16,32 @@ pub fn cat_file(repo_path: &RepoPath, hash: &str) -> String {
 
     String::from_utf8_lossy(contents).into_owned()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::utils::tests::{remove_test_repo, setup_test_repo};
+    use crate::utils::{hash_and_store, RepoPath};
+
+    #[test]
+    fn test_cat_file_reads_stored_object() {
+        setup_test_repo();
+
+        // create and store a blob object
+        let object_type: &str = "blob";
+        let content: &str = "This is a test content for the cat_file function.";
+        let object_hash: String = hash_and_store(object_type, content.as_bytes());
+
+        // read the object content using `cat_file`
+        let output: String = cat_file(&RepoPath::Local, &object_hash);
+
+        // verify that the returned content is correct
+        assert_eq!(
+            output, content,
+            "The content read by `cat_file` should match the original content."
+        );
+
+        // clean up the test repository
+        remove_test_repo();
+    }
+}

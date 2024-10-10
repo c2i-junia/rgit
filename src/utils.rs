@@ -153,3 +153,43 @@ pub fn get_missing_objects(repo_path: &RepoPath, objects: &HashSet<String>) -> H
         }
     }
 }
+
+#[cfg(test)]
+pub mod tests {
+    use std::env;
+    use std::fs;
+    use std::path::Path;
+
+    /// removes the test directory `test-repo` if it exists, creates a new one,
+    /// and initializes a `.rgit` repository in this directory
+    pub fn setup_test_repo() {
+        let repo_dir: &str = "test-repo";
+
+        // if the directory already exists, remove it
+        if Path::new(repo_dir).exists() {
+            fs::remove_dir_all(repo_dir).expect("failed to remove existing test-repo directory");
+        }
+
+        // create the new `test-repo` directory
+        fs::create_dir(repo_dir).expect("failed to create test-repo directory");
+
+        // change to the `test-repo` directory
+        env::set_current_dir(repo_dir).expect("failed to change directory to test-repo");
+
+        // initialize the `.rgit` repository
+        crate::commands::init::init();
+    }
+
+    /// returns to the parent directory and removes the `test-repo` directory
+    pub fn remove_test_repo() {
+        let repo_dir: &str = "test-repo";
+
+        // change back to the parent directory
+        env::set_current_dir("..").expect("failed to change directory back to parent");
+
+        // remove the `test-repo` directory if it exists
+        if Path::new(repo_dir).exists() {
+            fs::remove_dir_all(repo_dir).expect("failed to remove test-repo directory");
+        }
+    }
+}

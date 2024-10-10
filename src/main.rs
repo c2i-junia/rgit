@@ -69,7 +69,8 @@ fn main() {
                 eprintln!("Usage: rgit hash-object <file>");
                 std::process::exit(1);
             }
-            hash_object(&args[2]);
+            let hash: String = hash_object(&args[2]);
+            println!("{}", hash);
         }
         "cat-file" => {
             if args.len() != 3 {
