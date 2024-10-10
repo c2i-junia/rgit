@@ -36,6 +36,8 @@ Commands:
     update-ref <ref_name> <commit_hash>   Update a reference to a commit hash.
     symbolic-ref <ref_name> <target_ref>  Set a symbolic reference.
     get-head-hash                         Display the commit hash pointed to by HEAD.
+
+see https://github.com/c2i-junia/rgit/blob/dev/docs/commandes.md for detailed documentation
 ```
 
 <br>
