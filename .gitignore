@@ -1,6 +1,7 @@
 /target
 /test-workspace
 rgit
+.rgit
 
 add.sh
 remove.sh
