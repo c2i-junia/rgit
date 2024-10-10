@@ -98,6 +98,8 @@ Message: First commit
     - Run `cargo fmt` before committing.
     - All variables must have explicit type annotations.
     - Avoid overly compact code (prioritize clarity and simplicity, even if it requires more lines).
+    - All variable names, function names, and comments must be in English
+    - Use snake_case for variable and function names, and CamelCase for struct, enum, and trait names.
 2. **Commit Messages**:
    - Use a capitalized first letter.
    - Write commit messages in the present tense (e.g., "Add feature X" instead of "Added feature X").
