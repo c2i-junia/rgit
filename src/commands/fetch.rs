@@ -55,7 +55,7 @@ pub fn fetch(remote_repo_path: &str, branch: &str) {
     }
 
     // update the local reference to point to the fetched commit
-    let local_branch_ref: String = format!(".rgit/refs/{}", branch);
+    let local_branch_ref: String = format!(".rgit/refs/remotes/{}", branch);
     fs::write(&local_branch_ref, remote_commit_hash)
         .expect("Failed to update local branch reference");
 
